@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LEGEND CREW - Leaderboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+body{background:#0a0a0f;color:#fff;min-height:100vh;padding:20px 12px}
+.top{text-align:center;margin:20px 0 5px}
+.top h1{font-size:42px;letter-spacing:3px;background:linear-gradient(90deg,#FFD700,#FF6B00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.top p{color:#aaa;margin-top:6px;letter-spacing:2px;font-size:13px}
+.badge{display:inline-block;background:#FFD700;color:#000;font-weight:900;padding:6px 16px;border-radius:20px;margin:14px 0;font-size:13px}
+.reset-box{max-width:650px;margin:0 auto 14px;background:#1c1c2a;border:1px solid #FFD70033;border-radius:14px;padding:12px;text-align:center}
+.reset-box b{color:#FFD700}
+.reset-box small{color:#aaa;display:block;margin-top:4px}
+.card{max-width:650px;margin:0 auto;background:#15151f;border:1px solid #2a2a3a;border-radius:20px;overflow:hidden}
+.header{display:flex;justify-content:space-between;padding:16px 18px;background:#1c1c2a;font-weight:700;font-size:13px;color:#ccc}
+.row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #222233;gap:8px}
+.row:last-child{border:none}
+.left{display:flex;align-items:center;gap:10px;flex:1}
+.rank{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;background:#222233;flex-shrink:0}
+.r1 .rank{background:#FFD700;color:#000}
+.r2 .rank{background:#C0C0C0;color:#000}
+.r3 .rank{background:#CD7F32;color:#000}
+.avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#FFD700,#FF6B00);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:#000;flex-shrink:0}
+.name{font-weight:700;font-size:15px}
+.sub{color:#888;font-size:11px}
+.right{display:flex;align-items:center;gap:8px}
+.points{font-weight:900;font-size:16px;color:#FFD700;text-align:right;min-width:55px}
+.points small{display:block;color:#888;font-size:10px;font-weight:400}
+.voteBtn{background:#FFD700;color:#000;border:none;padding:8px 10px;border-radius:10px;font-weight:900;font-size:12px;cursor:pointer}
+.voteBtn:disabled{background:#333;color:#888;cursor:not-allowed}
+.footer{text-align:center;color:#666;font-size:12px;margin:20px 0}
+.btn{display:block;max-width:650px;margin:18px auto 0;text-align:center;background:#FFD700;color:#000;padding:14px;border-radius:12px;font-weight:900;text-decoration:none}
+.note{text-align:center;color:#aaa;font-size:12px;margin:10px 0}
+</style>
+</head>
+<body>
+<div class="top">
+<h1>LEGEND CREW</h1>
+<p>OFFICIAL LEADERBOARD</p>
+<div class="badge">🏆 WEEKLY VOTE • SEASON 1</div>
+</div>
+
+<div class="reset-box">
+<b id="resetText">⏰ Next Reset: Monday</b>
+<small id="lastWinner">Last Week Winner: -</small>
+<small>සෑම සඳුදාම 12:00 AM ට Votes ඔක්කොම Reset වෙනවා!</small>
+</div>
+
+<p class="note">👇 ඔයා කැමති එකාට VOTE කරන්න. 1 සතියට 1 කෙනෙකුට 1 පාරයි.</p>
+
+<div class="card">
+<div class="header"><span>RANK & PLAYER</span><span>POINTS / VOTE</span></div>
+<div id="list"></div>
+</div>
+<a class="btn" href="https://c9tgw82j6g-netizen.github.io/Legend-crew/">⬅ BACK TO MAIN SITE</a>
+<div class="footer">© 2026 LEGEND CREW • Vote & Rise!</div>
+<script>
+let basePlayers=[
+{name:"Oshuz",pts:3250},{name:"Niko",pts:3120},{name:"Doop",pts:2980},{name:"Suwa",pts:2870},{name:"Shenu",pts:2750},{name:"Ruddra",pts:2640},{name:"Scoob",pts:2520},{name:"Akiyo",pts:2410},{name:"Alvin",pts:2330},{name:"Sineth",pts:2250},{name:"Sonik",pts:2180},{name:"Kenzo",pts:2090},{name:"Alpha",pts:2010},{name:"Chami",pts:1940},{name:"Gimazz",pts:1860},{name:"Dew",pts:1790},{name:"Bufy",pts:1720},{name:"Bobby",pts:1650},{name:"Rakuzer",pts:1580},{name:"Norix",pts:1510},{name:"Next gen",pts:1440},{name:"Oshi",pts:1380},{name:"X podda",pts:1320},{name:"Shan",pts:1260},{name:"Silent",pts:1200},{name:"Suno",pts:1140},{name:"Nadeezz",pts:1080},{name:"Shaggy",pts:1020},{name:"Abhi",pts:960},{name:"Kavi",pts:900},{name:"Lynex",pts:850},{name:"Ishuz",pts:800},{name:"Sithuz",pts:750},{name:"Noizzy",pts:700}
+];
+function getWeekKey(){
+  let now=new Date();
+  let d=new Date(Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()));
+  let dayNum=d.getUTCDay()||7;
+  d.setUTCDate(d.getUTCDate()+4-dayNum);
+  let yearStart=new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  let weekNo=Math.ceil((((d-yearStart)/86400000)+1)/7);
+  return d.getUTCFullYear()+"-W"+weekNo;
+}
+function getNextMonday(){
+  let now=new Date();
+  let next=new Date(now);
+  next.setDate(now.getDate()+((8-now.getDay())%7||7));
+  next.setHours(0,0,0,0);
+  let diff=next-now;
+  let days=Math.floor(diff/86400000);
+  let hours=Math.floor((diff%86400000)/3600000);
+  return days+" Days "+hours+" Hours Left";
+}
+let currentWeek=getWeekKey();
+let storedWeek=localStorage.getItem('lc_week');
+let lastWinner=localStorage.getItem('lc_lastWinner')||'-';
+if(storedWeek!==currentWeek){
+  if(storedWeek){
+    let oldVotes=JSON.parse(localStorage.getItem('lc_votes')||'{}');
+    let topName='-'; let topVotes=-1;
+    for(let k in oldVotes){ if(oldVotes[k]>topVotes){ topVotes=oldVotes[k]; topName=k; } }
+    if(topName!=='-'){ lastWinner=topName+' ('+topVotes+' votes)'; localStorage.setItem('lc_lastWinner',lastWinner); }
+  }
+  localStorage.setItem('lc_week',currentWeek);
+  localStorage.removeItem('lc_votes');
+  localStorage.removeItem('lc_voted');
+}
+document.getElementById('resetText').innerText='⏰ Next Reset: Monday • '+getNextMonday();
+document.getElementById('lastWinner').innerText='🏆 Last Week Winner: '+localStorage.getItem('lc_lastWinner')||'-';
+let players=JSON.parse(JSON.stringify(basePlayers));
+let saved=JSON.parse(localStorage.getItem('lc_votes')||'{}');
+players.forEach(p=>{ if(saved[p.name]) p.pts+=saved[p.name]*10; });
+let voted=localStorage.getItem('lc_voted')||'';
+function render(){
+  players.sort((a,b)=>b.pts-a.pts);
+  let html='';
+  players.forEach((p,i)=>{
+    let cls=i==0?'r1':i==1?'r2':i==2?'r3':'';
+    let crown=i==0?' 👑':'';
+    let disabled=voted? 'disabled':'';
+    let btnText=voted===p.name?'✓ VOTED':voted?'VOTED':'+ VOTE';
+    html+=`<div class="row ${cls}"><div class="left"><div class="rank">${i+1}</div><div class="avatar">${p.name[0]}</div><div><div class="name">${p.name}${crown}</div><div class="sub">${i<3?'Legend':'Rising'} • Rank ${i+1}</div></div></div><div class="right"><div class="points">${p.pts.toLocaleString()}<small>points</small></div><button class="voteBtn" onclick="vote('${p.name}')" ${disabled}>${btnText}</button></div></div>`;
+  });
+  document.getElementById('list').innerHTML=html;
+}
+function vote(name){
+  if(voted){ alert('ඔයා මේ සතියට දැනටමත් Vote කරලා තියෙනවා!'); return; }
+  voted=name;
+  localStorage.setItem('lc_voted',name);
+  saved[name]=(saved[name]||0)+1;
+  localStorage.setItem('lc_votes',JSON.stringify(saved));
+  let p=players.find(x=>x.name===name);
+  p.pts+=10;
+  render();
+  alert('🔥 '+name+' ට Vote එක වැදුනා! +10 Points!');
+}
+render();
+</script>
+</body>
+</html>
